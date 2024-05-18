@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k6-test-configmap
+data:
+  k6-script-1.js: |
+    import http from 'k6/http';
+    import { check, sleep } from 'k6';
+    
+    export let options = {
+      vus: 10,
+      duration: '30s',
+    };
+    
+    export default function () {
+      let res = http.get('https://test.k6.io');
+      check(res, { 'status was 200': (r) => r.status == 200 });
+      sleep(1);
+    };
+  k6-script-2.js: |
+    import http from 'k6/http';
+    import { sleep } from 'k6';
+    
+    export const options = {
+      stages: [
+        { duration: '10s', target: 15 },
+        { duration: '20s', target: 15 },
+        { duration: '10s', target: 0 },
+      ],
+    };
+    
+    export default function () {
+      let res = http.get('https://test.k6.io');
+      check(res, { 'status was 200': (r) => r.status == 200 });
+      sleep(1);
+    }

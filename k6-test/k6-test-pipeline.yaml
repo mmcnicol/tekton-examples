@@ -1,0 +1,14 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: k6-test-pipeline
+spec:
+  workspaces:
+    - name: shared
+  tasks:
+    - name: run-script-1-task
+      taskRef:
+        name: k6-test-run-script-1-task
+      workspaces:
+        - name: shared
+          workspace: shared

@@ -1,0 +1,18 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  annotations: {}
+  name: k6-test-pipeline-run
+  labels: {}
+  namespace: default
+spec:
+  pipelineRef:
+    name: k6-test-pipeline
+  taskRunTemplate:
+    serviceAccountName: default
+  timeouts:
+    pipeline: 1h0m0s
+  workspaces:
+    - name: shared
+      configmap:
+        name: k6-test-configmap

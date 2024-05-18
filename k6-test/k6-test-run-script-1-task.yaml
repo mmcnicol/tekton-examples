@@ -1,0 +1,13 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: k6-test-run-script-1-task
+spec:
+  workspaces:
+    - name: shared
+  steps:
+    - name: run-script-1-step
+      image: grafana/k6
+      script: |
+        #!/bin/sh
+        k6 run /workspace/shared/k6-script-1.js --quiet
