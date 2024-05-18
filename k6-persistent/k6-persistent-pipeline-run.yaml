@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: k6-persistent-pipeline-run
+spec:
+  pipelineRef:
+    name: k6-persistent-pipeline
+  params:
+  - name: script1
+    value: "k6-script-1.js"
+  - name: script2
+    value: "k6-script-2.js"
+  workspaces:
+    - name: shared-data
+      persistentVolumeClaim:
+        claimName: k6-persistent-pvc

@@ -1,0 +1,106 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: k6-persistent-pipeline
+spec:
+  params:
+  - name: script1
+    type: string
+  - name: script2
+    type: string
+  workspaces:
+    - name: shared-data
+  tasks:
+    - name: k6-persistent-create-script-1-task
+      taskRef:
+        name: write-file
+        kind: Task
+      workspaces:
+        - name: output
+          workspace: shared-data
+      params:
+        - name: path
+          value: ./$(params.script1)
+        - name: mode
+          value: "0644"
+        - name: contents
+          value: |
+            import http from 'k6/http';
+            import { check, sleep } from 'k6';
+            
+            export let options = {
+              vus: 10,
+              duration: '30s',
+            };
+            
+            export default function () {
+              let res = http.get('https://test.k6.io');
+              check(res, { 'status was 200': (r) => r.status == 200 });
+              sleep(1);
+            };
+    - name: k6-persistent-create-script-2-task
+      taskRef:
+        name: write-file
+        kind: Task
+      workspaces:
+        - name: output
+          workspace: shared-data
+      params:
+        - name: path
+          value: ./$(params.script2)
+        - name: mode
+          value: "0644"
+        - name: contents
+          value: |
+            import http from 'k6/http';
+            import { check, sleep } from 'k6';
+            
+            export const options = {
+              stages: [
+                { duration: '10s', target: 15 },
+                { duration: '20s', target: 15 },
+                { duration: '10s', target: 0 },
+              ],
+            };
+            
+            export default function () {
+              let res = http.get('https://test.k6.io');
+              check(res, { 'status was 200': (r) => r.status == 200 });
+              sleep(1);
+            };
+    - name: change-ownership-task
+      runAfter:
+        - k6-persistent-create-script-1-task
+        - k6-persistent-create-script-2-task
+      taskSpec:
+        steps:
+          - name: change-ownership
+            image: busybox
+            script: |
+              #!/bin/sh
+              chown -R 1000:1000 /workspace/shared-data
+      workspaces:
+        - name: shared-data
+          workspace: shared-data
+    - name: k6-persistent-script-1-task
+      runAfter:
+        - change-ownership-task
+      taskRef:
+        name: k6-persistent-script-1-task
+      params:
+      - name: script
+        value: $(params.script1)
+      workspaces:
+        - name: shared-data
+          workspace: shared-data
+    - name: k6-persistent-script-2-task
+      runAfter:
+        - k6-persistent-script-1-task
+      taskRef:
+        name: k6-persistent-script-2-task
+      params:
+      - name: script
+        value: $(params.script2)
+      workspaces:
+        - name: shared-data
+          workspace: shared-data

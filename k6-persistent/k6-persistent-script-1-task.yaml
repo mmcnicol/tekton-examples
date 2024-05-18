@@ -1,0 +1,27 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: k6-persistent-script-1-task
+spec:
+  params:
+    - name: script
+      type: string
+      description: The k6 script to run
+      default: k6-script-1.js
+  workspaces:
+    - name: shared-data
+  steps:
+    - name: run-k6-script
+      image: grafana/k6
+      script: |
+        #!/bin/sh
+        pwd
+        ls -l /
+        ls -l /workspace
+        ls -l /workspace/shared-data
+        #cp /workspace/shared-data/$(params.script) .
+        k6 run /workspace/shared-data/$(params.script) --quiet >  /workspace/shared-data/console-output-script-1.txt
+        cat /workspace/shared-data/console-output-script-1.txt
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
