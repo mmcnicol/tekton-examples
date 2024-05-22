@@ -6,10 +6,10 @@ spec:
   workspaces:
     - name: shared-data
   steps:
-    - name: build
+    - name: build-task
       image: maven:3.8.3-openjdk-17
       script: |
         cd $(workspaces.shared-data.path)/demo-java-app
         pwd
         ls -l
-        mvn -q test
+        mvn -B test

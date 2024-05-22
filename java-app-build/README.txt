@@ -17,9 +17,6 @@ kubectl apply -f .\java-app-build
 
 cd C:\Data\github\tekton-examples\java-app-build
 
-kubectl apply -f git-resource.yaml
-kubectl apply -f task-clone-repo.yaml
 kubectl apply -f task-build.yaml
-kubectl apply -f task-test.yaml
 kubectl apply -f pipeline.yaml
 kubectl apply -f pipeline-run.yaml
