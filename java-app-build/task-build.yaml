@@ -1,0 +1,15 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: demo-java-app-build-task
+spec:
+  workspaces:
+    - name: shared-data
+  steps:
+    - name: build
+      image: maven:3.8.3-openjdk-17
+      script: |
+        cd $(workspaces.shared-data.path)/demo-java-app
+        pwd
+        ls -l
+        mvn -q test

@@ -1,0 +1,17 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: demo-java-app-pipeline-run
+spec:
+  pipelineRef:
+    name: demo-java-app-pipeline
+  params:
+  - name: repo-url
+    value: "https://github.com/mmcnicol/selenium-examples.git"
+  podTemplate:
+    securityContext:
+      fsGroup: 65532
+  workspaces:
+    - name: shared-data
+      persistentVolumeClaim:
+        claimName: k6-persistent-pvc
